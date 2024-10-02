@@ -5,6 +5,7 @@ from rest_framework.settings import api_settings
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from teams.permissions import IsAdminModeratorManager
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -40,4 +41,4 @@ class UserViewSet(
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminModeratorManager)

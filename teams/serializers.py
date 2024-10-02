@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from teams.models import Team
+from users.serializers import UsernameSerializer
 
 
 class TeamSerializer(serializers.ModelSerializer):
-    members = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    members = UsernameSerializer(many=True, read_only=True)
 
     class Meta:
         model = Team

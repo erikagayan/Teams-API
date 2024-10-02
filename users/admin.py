@@ -1,19 +1,17 @@
-from users.models import User
 from django.contrib import admin
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
-
+from .models import User
 
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
-    """Define admin model for custom User model with no email field."""
-
+    """Определение модели администрирования для пользовательской модели User."""
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Personal info"), {"fields": ("first_name", "last_name")}),
+        (_("Personal info"), {"fields": ("first_name", "last_name", "team")}),
         (
-            "Permissions",
-            {"fields": ("is_moderator", "is_manager", "is_staff", "groups")},
+            _("Permissions"),
+            {"fields": ("is_moderator", "is_manager", "is_staff", "is_superuser", "groups", "user_permissions")},
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
@@ -22,10 +20,11 @@ class UserAdmin(DjangoUserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "password1", "password2"),
+                "fields": ("email", "username", "password1", "password2", "is_moderator", "is_manager", "team"),
             },
         ),
     )
-    list_display = ("email", "first_name", "last_name", "is_moderator", "is_manager")
-    search_fields = ("email", "first_name", "last_name")
+    list_display = ("email", "first_name", "last_name", "is_moderator", "is_manager", "is_staff")
+    list_filter = ("is_moderator", "is_manager", "is_staff", "is_superuser")
+    search_fields = ("email", "first_name", "last_name", "username")
     ordering = ("email",)
