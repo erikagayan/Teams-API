@@ -50,6 +50,13 @@ class User(AbstractUser):
     is_manager = models.BooleanField(default=False)
     email = models.EmailField(_("email address"), unique=True)
     username = models.CharField(_("username"), unique=True, max_length=150)
+    team = models.ForeignKey(
+        "teams.Team",
+        related_name="members",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     # Email for auth
     USERNAME_FIELD = "email"
@@ -65,8 +72,10 @@ class User(AbstractUser):
         super().clean()
 
         # addition email validation
-        if self.email and not self.email.endswith('@example.com'):
-            raise ValidationError(_('Email address must be from the example.com domain'))
+        if self.email and not self.email.endswith("@example.com"):
+            raise ValidationError(
+                _("Email address must be from the example.com domain")
+            )
 
     class Meta:
         verbose_name = _("user")

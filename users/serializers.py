@@ -1,15 +1,20 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-
+from teams.models import Team
 
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    team = serializers.PrimaryKeyRelatedField(
+        queryset=Team.objects.all(), required=False, allow_null=True
+    )
+    team_name = serializers.CharField(source="team.name", read_only=True)
+
     class Meta:
         model = User
-        fields = ("id", "username", "email", "password")
+        fields = ("id", "username", "email", "password", "team", "team_name")
         extra_kwargs = {"password": {"write_only": True}}
 
     @staticmethod
@@ -18,25 +23,31 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        try:
-            user = User.objects.create_user(
-                username=validated_data["username"],
-                email=validated_data["email"],
-                password=validated_data["password"],
-                is_moderator=validated_data.get("is_moderator", False),
-                is_manager=validated_data.get("is_manager", False)
-            )
-            return user
-        except Exception as e:
-            raise serializers.ValidationError({"detail": str(e)})
+        team = validated_data.pop("team", None)
+        user = User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data["email"],
+            password=validated_data["password"],
+            is_moderator=validated_data.get("is_moderator", False),
+            is_manager=validated_data.get("is_manager", False),
+        )
+        if team:
+            user.team = team
+            user.save()
+        return user
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
+        team = validated_data.pop("team", None)
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
         if password:
             instance.set_password(password)
+        if team is not None:
+            instance.team = team
+
         try:
             instance.save()
         except Exception as e:
