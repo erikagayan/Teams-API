@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "drf_spectacular",
     "users",
     "teams",
 ]
@@ -113,6 +114,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+
+    "DEFAULT_SCHEMA_CLASS":
+        "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -123,4 +127,17 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
     "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Teams API",
+    "DESCRIPTION": "API for creating teams",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "defaultModelRendering": "model",
+        "defaultModelExpandDepth": 2,
+        "defaultModelsExpandDepth": 2,
+    }
 }
