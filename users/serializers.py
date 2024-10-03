@@ -9,15 +9,22 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     team = serializers.PrimaryKeyRelatedField(
-        queryset=Team.objects.all(),
-        required=False,
-        allow_null=True
+        queryset=Team.objects.all(), required=False, allow_null=True
     )
-    team_name = serializers.CharField(source='team.name', read_only=True)
+    team_name = serializers.CharField(source="team.name", read_only=True)
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "password", "team", "team_name", "is_moderator", "is_manager")
+        fields = (
+            "id",
+            "username",
+            "email",
+            "password",
+            "team",
+            "team_name",
+            "is_moderator",
+            "is_manager",
+        )
         extra_kwargs = {
             "password": {"write_only": True},
             "is_moderator": {"required": False},
@@ -25,12 +32,14 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        user = self.context['request'].user
-        # Проверяем, является ли текущий пользователь администратором, модератором или менеджером
+        user = self.context["request"].user
+        # Check if the current user is an administrator, moderator or manager
         if not is_admin_moderator_manager(user):
-            # Обычные пользователи не могут устанавливать эти флаги
-            if 'is_moderator' in attrs or 'is_manager' in attrs:
-                raise serializers.ValidationError("You do not have permission to set moderator or manager status.")
+            # Normal users cannot set these flags
+            if "is_moderator" in attrs or "is_manager" in attrs:
+                raise serializers.ValidationError(
+                    "You do not have permission to set moderator or manager status."
+                )
         return attrs
 
     @staticmethod
@@ -74,6 +83,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UsernameSerializer(serializers.ModelSerializer):
     """Return users username"""
+
     class Meta:
         model = User
         fields = ["username"]
