@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from teams.models import Team
+from teams.permissions import is_admin_moderator_manager
 
 User = get_user_model()
 
@@ -14,8 +15,32 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "password", "team", "team_name")
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = (
+            "id",
+            "username",
+            "email",
+            "password",
+            "team",
+            "team_name",
+            "is_moderator",
+            "is_manager",
+        )
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "is_moderator": {"required": False},
+            "is_manager": {"required": False},
+        }
+
+    def validate(self, attrs):
+        user = self.context["request"].user
+        # Check if the current user is an administrator, moderator or manager
+        if not is_admin_moderator_manager(user):
+            # Normal users cannot set these flags
+            if "is_moderator" in attrs or "is_manager" in attrs:
+                raise serializers.ValidationError(
+                    "You do not have permission to set moderator or manager status."
+                )
+        return attrs
 
     @staticmethod
     def validate_password(value):
@@ -54,3 +79,11 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"detail": str(e)})
 
         return instance
+
+
+class UsernameSerializer(serializers.ModelSerializer):
+    """Return users username"""
+
+    class Meta:
+        model = User
+        fields = ["username"]
