@@ -1,14 +1,21 @@
 from datetime import timedelta
 from pathlib import Path
+import os
+import environ
+
+env = environ.Env(
+    DEBUG=(bool, False)
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
-SECRET_KEY = "django-insecure-y8(c5crdbvi9(2d^1x%n$3!b(ko(8lh^q=!@l7+1#12_)#*wj1"
+SECRET_KEY = env('SECRET_KEY')
 
 
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -63,9 +70,13 @@ WSGI_APPLICATION = "teamsAPI.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('DATABASE_PORT'),
     }
 }
 
